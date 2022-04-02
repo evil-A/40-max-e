@@ -3,7 +3,7 @@
 #include <string.h>
 #include <errno.h>
 
-int	flagpipe;
+int flagpipe;
 int	back_stdin;
 int	ret;
 
@@ -84,7 +84,7 @@ void	ft_cd(char **argv)
 	}
 	if (chdir(argv[1]) == -1)
 	{
-		ft_putstr_fd("error: cd: cannot change directory to", 2);
+		ft_putstr_fd("error: cd: cannot change directory to ", 2);
 		ft_putstr_fd(argv[1], 2);
 		ft_putstr_fd("\n", 2);
 		ret = 1;
@@ -102,7 +102,7 @@ void	ft_execute(char **argv, char **envp)
 	if (flagpipe)
 		if (pipe(fd) == -1)
 			ftal();
-	pid = (fork());
+	pid = fork();
 	if (pid == 0)
 	{
 		opening(fd);
@@ -146,7 +146,7 @@ void	ft_restorefd(void)
 	int	tmp;
 
 	tmp = dup(STDIN_FILENO);
-	if (dup2(back_stdin, STDIN_FILENO) == -1)
+	if (dup2(back_stdin, STDIN_FILENO))
 		ftal();
 	if (close(tmp) == -1)
 		ftal();
@@ -160,17 +160,21 @@ int	main(int argc, char **argv, char **envp)
 	i = 0;
 	begin = 1;
 	back_stdin = dup(STDIN_FILENO);
-	while (argv[++i])
+	(void)argc;
+	while(argv[++i])
 	{
 		if (!strcmp(argv[i], ";") || !argv[i + 1])
 		{
-			if (!strcmp(argv[i], ";"))
-				argv[i] = NULL;
-			ft_command(argv + begin, envp);
-			begin = i + 1;
+			if (!strcmp(argv[i], ";") || !argv[i + 1])
+			{
+				if (!strcmp(argv[i], ";"))
+					argv[i] = NULL;
+				ft_command(argv + begin, envp);
+				begin = i + 1;
+			}
+			ret =  0;
+			ft_restorefd();
 		}
-		ret = 0;
-		ft_restorefd();
 	}
 	return (ret);
 }
