@@ -3,7 +3,7 @@
 #include <string.h>
 #include <errno.h>
 
-int flagpipe;
+int	flagpipe;
 int	back_stdin;
 int	ret;
 
@@ -109,8 +109,7 @@ void	ft_execute(char **argv, char **envp)
 		if (execve(argv[0], argv, envp) == -1)
 			ft_exec_error(argv[0]);
 	}
-	else
-		closing(fd);
+	closing(fd);
 }
 
 void	ft_command(char **argv, char **envp)
@@ -146,7 +145,7 @@ void	ft_restorefd(void)
 	int	tmp;
 
 	tmp = dup(STDIN_FILENO);
-	if (dup2(back_stdin, STDIN_FILENO))
+	if (dup2(back_stdin, STDIN_FILENO) == -1)
 		ftal();
 	if (close(tmp) == -1)
 		ftal();
@@ -161,20 +160,17 @@ int	main(int argc, char **argv, char **envp)
 	begin = 1;
 	back_stdin = dup(STDIN_FILENO);
 	(void)argc;
-	while(argv[++i])
+	while (argv[++i])
 	{
 		if (!strcmp(argv[i], ";") || !argv[i + 1])
 		{
-			if (!strcmp(argv[i], ";") || !argv[i + 1])
-			{
-				if (!strcmp(argv[i], ";"))
+			if (!strcmp(argv[i], ";"))
 					argv[i] = NULL;
-				ft_command(argv + begin, envp);
-				begin = i + 1;
-			}
-			ret =  0;
-			ft_restorefd();
+			ft_command(argv + begin, envp);
+			begin = i + 1;
 		}
+		ret = 1;
+		ft_restorefd();
 	}
 	return (ret);
 }
